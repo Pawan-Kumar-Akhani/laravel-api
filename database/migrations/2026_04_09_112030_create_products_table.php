@@ -12,20 +12,27 @@ return new class extends Migration
     public function up(): void
     {
     Schema::create('products', function (Blueprint $table) {
-        $table->id();
-        $table->string('name');
-        $table->text('description')->nullable();
-        $table->decimal('price', 10, 2);
-        $table->decimal('discount_price', 10, 2)->nullable();
-        $table->integer('stock')->default(0);
-         $table->string('image')->nullable(); // ✅ ADD THIS
-        $table->unsignedBigInteger('category_id')->nullable();
+        
+       $table->id();
 
-        $table->foreign('category_id')
-      ->references('id')
-      ->on('categories')
+    $table->foreignId('user_id')
+      ->nullable()
+      ->constrained()
       ->nullOnDelete();
-        $table->timestamps();
+
+    $table->string('name');
+    $table->text('description')->nullable();
+    $table->decimal('price', 10, 2);
+    $table->decimal('discount_price', 10, 2)->nullable();
+    $table->integer('stock')->default(0);
+    $table->string('image')->nullable();
+
+    $table->foreignId('category_id')
+      ->nullable()
+      ->constrained()
+      ->nullOnDelete();
+
+    $table->timestamps();
         
         });
     }
