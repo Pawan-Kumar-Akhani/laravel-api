@@ -29,6 +29,7 @@ class ProductController extends Controller
         }
 
         $product = Product::create([
+            'user_id' => Auth::id(),
             'name' => $request->name,
             'description' => $request->description,
             'price' => $request->price,

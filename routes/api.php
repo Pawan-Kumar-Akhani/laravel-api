@@ -3,36 +3,68 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ProductController;
-use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\Api\CategoryController;
 
-// Public routes
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
-Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+/*
+|--------------------------------------------------------------------------
+| Public Routes
+|--------------------------------------------------------------------------
+*/
 
-// Protected routes
+Route::prefix('auth')->group(function () {
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+    Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| Protected Routes (JWT Auth)
+|--------------------------------------------------------------------------
+*/
+
 Route::middleware('jwt.auth')->group(function () {
 
-    Route::get('/profile', [AuthController::class, 'getProfile']);
-    Route::put('/profile', [AuthController::class, 'updateProfile']);
-    Route::post('/profile/image', [AuthController::class, 'updateProfileImage']);
-    Route::post('/logout', [AuthController::class, 'logout']);
+    /*
+    |--------------------------------------------------------------------------
+    | User Profile
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('user')->group(function () {
+        Route::get('/profile', [AuthController::class, 'getProfile']);
+        Route::put('/profile', [AuthController::class, 'updateProfile']);
+        Route::post('/profile/image', [AuthController::class, 'updateProfileImage']);
+        Route::post('/logout', [AuthController::class, 'logout']);
+    });
 
-    // 🔥 DEBUG ROUTE (correct)
-    Route::get('/debug-admin', function () {
+
+    /*
+    |--------------------------------------------------------------------------
+    | Products (CRUD)
+    |--------------------------------------------------------------------------
+    */
+    Route::apiResource('products', ProductController::class);
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Categories (CRUD)
+    |--------------------------------------------------------------------------
+    */
+    Route::apiResource('categories', CategoryController::class);
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Debug (optional - remove in production)
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/debug-user', function () {
         return response()->json([
             'user' => auth()->user()
         ]);
     });
-
-    // 🔥 ADMIN ROUTES (correct placement)
-    Route::middleware('role:admin')->group(function () {
-        Route::post('/products', [ProductController::class, 'store']);
-        Route::post('/products/{id}', [ProductController::class, 'update']);
-        Route::delete('/products/{id}', [ProductController::class, 'destroy']);
-    });
-
-    Route::apiResource('categories', CategoryController::class);
 
 });
