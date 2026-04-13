@@ -63,14 +63,39 @@ class ProductController extends Controller
     }
 
     // 🔹 GET ALL PRODUCTS (Public)
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::with('category')->latest()->get();
+    $query = Product::with('category')->latest();
 
-        return response()->json([
-            'status' => true,
-            'products' => $products
-        ]);
+    // 🔍 SEARCH by name
+    if ($request->has('search')) {
+        $query->where('name', 'like', '%' . $request->search . '%');
+    }
+
+    // 📂 FILTER by category
+    if ($request->has('category_id')) {
+        $query->where('category_id', $request->category_id);
+    }
+
+    // 💰 PRICE FILTER (min - max)
+    if ($request->has('min_price')) {
+        $query->where('price', '>=', $request->min_price);
+    }
+
+    if ($request->has('max_price')) {
+        $query->where('price', '<=', $request->max_price);
+    }
+
+    // 📄 PAGINATION
+    $perPage = $request->get('per_page', 10);
+
+    $products = $query->paginate($perPage);
+
+    return response()->json([
+        'status' => true,
+        'message' => 'Products fetched successfully',
+        'data' => $products
+    ]);
     }
 
     // 🔹 GET SINGLE PRODUCT (Public)

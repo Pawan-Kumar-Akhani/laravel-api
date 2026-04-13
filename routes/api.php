@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\DashboardController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -89,4 +91,18 @@ Route::middleware('jwt.auth')->group(function () {
             'user' => auth()->user()
         ]);
     });
-});
+
+    /*
+    |----------------------------------------
+    | Admin Dashboard 
+    |----------------------------------------
+    */
+    
+
+    Route::prefix('admin')->group(function () {
+    Route::get('/total-users', [DashboardController::class, 'totalUsers']);
+    Route::get('/total-orders', [DashboardController::class, 'totalOrders']);
+    Route::get('/total-revenue', [DashboardController::class, 'totalRevenue']);
+    Route::get('/top-products', [DashboardController::class, 'topProducts']);
+    });
+    });
