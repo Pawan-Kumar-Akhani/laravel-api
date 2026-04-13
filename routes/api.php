@@ -4,10 +4,12 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\CartController;
+use App\Http\Controllers\Api\OrderController;
 
 /*
 |--------------------------------------------------------------------------
-| Public Routes
+| PUBLIC ROUTES
 |--------------------------------------------------------------------------
 */
 
@@ -18,19 +20,18 @@ Route::prefix('auth')->group(function () {
     Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 });
 
-
 /*
 |--------------------------------------------------------------------------
-| Protected Routes (JWT Auth)
+| PROTECTED ROUTES (JWT AUTH)
 |--------------------------------------------------------------------------
 */
 
 Route::middleware('jwt.auth')->group(function () {
 
     /*
-    |--------------------------------------------------------------------------
-    | User Profile
-    |--------------------------------------------------------------------------
+    |----------------------------------------
+    | USER PROFILE
+    |----------------------------------------
     */
     Route::prefix('user')->group(function () {
         Route::get('/profile', [AuthController::class, 'getProfile']);
@@ -39,32 +40,53 @@ Route::middleware('jwt.auth')->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
     });
 
-
     /*
-    |--------------------------------------------------------------------------
-    | Products (CRUD)
-    |--------------------------------------------------------------------------
+    |----------------------------------------
+    | PRODUCTS (CRUD)
+    |----------------------------------------
     */
     Route::apiResource('products', ProductController::class);
 
-
     /*
-    |--------------------------------------------------------------------------
-    | Categories (CRUD)
-    |--------------------------------------------------------------------------
+    |----------------------------------------
+    | CATEGORIES (CRUD)
+    |----------------------------------------
     */
     Route::apiResource('categories', CategoryController::class);
 
+    /*
+    |----------------------------------------
+    | CART SYSTEM
+    |----------------------------------------
+    */
+    Route::prefix('cart')->group(function () {
+        Route::post('/add', [CartController::class, 'addToCart']);
+        Route::get('/', [CartController::class, 'getCart']);
+        Route::put('/{id}', [CartController::class, 'updateQuantity']);
+        Route::delete('/{id}', [CartController::class, 'removeItem']);
+        Route::delete('/clear', [CartController::class, 'clearCart']);
+    });
 
     /*
-    |--------------------------------------------------------------------------
-    | Debug (optional - remove in production)
-    |--------------------------------------------------------------------------
+    |----------------------------------------
+    | ORDER SYSTEM
+    |----------------------------------------
+    */
+    Route::prefix('orders')->group(function () {
+        Route::post('/place', [OrderController::class, 'placeOrder']);
+        Route::get('/', [OrderController::class, 'myOrders']);
+        Route::get('/{id}', [OrderController::class, 'orderDetails']);
+        Route::put('/{id}/status', [OrderController::class, 'updateStatus']);
+    });
+
+    /*
+    |----------------------------------------
+    | DEBUG (REMOVE IN PRODUCTION)
+    |----------------------------------------
     */
     Route::get('/debug-user', function () {
         return response()->json([
             'user' => auth()->user()
         ]);
     });
-
 });
